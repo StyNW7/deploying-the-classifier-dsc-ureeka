@@ -1,4 +1,4 @@
----
+<!-- ---
 title: Online Shoppers API
 emoji: 🛒
 colorFrom: blue
@@ -6,7 +6,7 @@ colorTo: green
 sdk: docker
 app_port: 8000
 pinned: false
----
+--- -->
 
 <div align="center">
 
@@ -41,7 +41,7 @@ This project bridges the gap between **machine learning experimentation** and **
 
 | | |
 |---|---|
-| **Dataset** | [Online Shoppers Intention](https://www.kaggle.com/datasets/henrysue/online-shoppers-intention) — 12,199 sessions |
+| **Dataset** | [Online Shoppers Intention](https://www.kaggle.com/datasets/henrysue/online-shoppers-intention) — 12,330 sessions |
 | **Model** | HistGradientBoostingClassifier (best of 6 models trained) |
 | **PR-AUC** | 0.7585 (CV) · 0.7415 (test) |
 | **ROC-AUC** | 0.9327 (test) |
