@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dataset Documentation — ShopperAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Manrope:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    /* =====================================================
+       TOKENS & RESET
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Manrope', system-ui, sans-serif;
+      background: #F4F5F0;
+      color: #0A0E0C;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    :root {
+      --bg:           #F4F5F0;
+      --bg-alt:       #ECEDE8;
+      --fg:           #0A0E0C;
+      --fg-muted:     #5A5E59;
+      --fg-subtle:    #8A8E87;
+      --green:        #1F7A3D;
+      --green-soft:   rgba(31,122,61,0.10);
+      --green-glow:   rgba(31,122,61,0.22);
+      --terra:        #C85A2E;
+      --terra-soft:   rgba(200,90,46,0.09);
+      --blue:         #2563EB;
+      --blue-soft:    rgba(37,99,235,0.09);
+      --surface:      rgba(255,255,255,0.60);
+      --surface-hi:   rgba(255,255,255,0.85);
+      --border:       rgba(10,14,12,0.09);
+      --border-md:    rgba(10,14,12,0.14);
+      --shadow-sm:    0 2px 8px rgba(10,14,12,0.06);
+      --shadow:       0 8px 32px rgba(10,14,12,0.09);
+      --shadow-lg:    0 24px 56px rgba(10,14,12,0.11);
+      --shadow-xl:    0 40px 90px -20px rgba(10,14,12,0.16);
+      --r-sm:  10px;
+      --r:     18px;
+      --r-lg:  24px;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 3px; }
+
+    /* grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.032; mix-blend-mode: multiply;
+      pointer-events: none; z-index: 9999;
+    }
+
+    /* typography */
+    h1,h2,h3,h4,h5 { font-family: 'Inter Tight', sans-serif; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; }
+    p { line-height: 1.72; }
+    .serif { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+    code { font-family: 'Manrope', monospace; font-size: 0.85em; background: var(--green-soft); color: var(--green); padding: 2px 7px; border-radius: 5px; font-weight: 600; }
+
+    /* layout */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+    .section-pad { padding: 88px 0; }
+
+    /* mesh */
+    .mesh { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .mesh::before { content:''; position:absolute; width:55%; height:65%; border-radius:50%; background:radial-gradient(ellipse,var(--green-soft) 0%,transparent 70%); top:-8%; left:-8%; filter:blur(70px); }
+    .mesh::after  { content:''; position:absolute; width:45%; height:55%; border-radius:50%; background:radial-gradient(ellipse,var(--terra-soft) 0%,transparent 70%); bottom:-8%; right:-8%; filter:blur(70px); }
+
+    /* =====================================================
+       NAV
+    ===================================================== */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      height: 62px; padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(244,245,240,0.75);
+      backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+      transition: background .3s, box-shadow .3s;
+    }
+    nav.scrolled { background: rgba(244,245,240,0.94); box-shadow: 0 1px 0 var(--border), 0 4px 20px rgba(10,14,12,0.06); }
+    .nav-brand { display:flex; align-items:center; gap:9px; font-family:'Inter Tight',sans-serif; font-weight:700; font-size:.97rem; letter-spacing:-.03em; color:var(--fg); text-decoration:none; }
+    .nav-brand-mark { width:30px; height:30px; background:var(--fg); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .nav-right { display:flex; align-items:center; gap:8px; }
+    .nav-chip {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:.78rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+      background: var(--green-soft); color: var(--green);
+      border: 1px solid rgba(31,122,61,0.18);
+      padding: 5px 12px; border-radius:999px;
+    }
+    .nav-chip-dot { width:6px; height:6px; border-radius:50%; background:var(--green); }
+    .nav-btn {
+      height:34px; padding:0 16px;
+      background:var(--fg); color:var(--bg);
+      border:none; border-radius:999px;
+      font-family:'Manrope',sans-serif; font-size:.82rem; font-weight:600;
+      cursor:pointer; text-decoration:none;
+      display:inline-flex; align-items:center; gap:6px;
+      transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s;
+    }
+    .nav-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(10,14,12,.22); }
+    .nav-pill {
+      display:flex; align-items:center; gap:2px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:999px; padding:4px;
+      backdrop-filter:blur(16px);
+    }
+    .nav-link {
+      font-size:.8rem; font-weight:500; color:var(--fg-muted);
+      text-decoration:none; padding:6px 13px; border-radius:999px;
+      transition: color .2s, background .2s;
+    }
+    .nav-link:hover { color:var(--fg); background:rgba(10,14,12,.06); }
+    .nav-link.active { color:var(--fg); background:var(--surface-hi); box-shadow:var(--shadow-sm); }
+
+    /* =====================================================
+       HERO
+    ===================================================== */
+    .hero-doc {
+      min-height: 76vh;
+      background: var(--bg);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center;
+      padding: 130px 0 80px;
+    }
+    .hero-doc .container { position:relative; z-index:1; }
+    .hero-doc-inner {
+      display: grid; grid-template-columns: 1fr 340px;
+      gap: 64px; align-items: center;
+    }
+    .hero-doc-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:.75rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--fg-muted); background:var(--surface); border:1px solid var(--border);
+      padding:5px 15px; border-radius:999px;
+      backdrop-filter:blur(12px); margin-bottom:24px;
+    }
+    .eyebrow-rule { width:18px; height:1.5px; background:var(--green); border-radius:1px; }
+    .hero-doc h1 { font-size:clamp(2.6rem,5.5vw,4.2rem); letter-spacing:-.055em; margin-bottom:18px; }
+    .hero-doc p  { font-size:1.02rem; color:var(--fg-muted); max-width:520px; line-height:1.75; margin-bottom:32px; }
+
+    .hero-meta {
+      display:flex; flex-wrap:wrap; gap:10px; margin-bottom:36px;
+    }
+    .meta-pill {
+      display:flex; align-items:center; gap:7px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:999px; padding:7px 15px;
+      font-size:.8rem; font-weight:600; color:var(--fg-muted);
+      backdrop-filter:blur(12px);
+    }
+    .meta-pill .dot { width:7px; height:7px; border-radius:50%; }
+    .dot-green  { background:var(--green); }
+    .dot-terra  { background:var(--terra); }
+    .dot-blue   { background:var(--blue); }
+    .dot-orange { background:#f59e0b; }
+
+    .btn-doc {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:12px 24px; border-radius:999px;
+      font-family:'Manrope',sans-serif; font-size:.88rem; font-weight:600;
+      cursor:pointer; text-decoration:none; border:none;
+      transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s;
+    }
+    .btn-doc svg { width:15px; height:15px; flex-shrink:0; }
+    .btn-doc-dark  { background:var(--fg); color:var(--bg); }
+    .btn-doc-dark:hover  { transform:translateY(-3px); box-shadow:0 14px 32px rgba(10,14,12,.25); }
+    .btn-doc-ghost { background:transparent; color:var(--fg); border:1px solid var(--border-md); }
+    .btn-doc-ghost:hover { border-color:var(--green); color:var(--green); background:var(--green-soft); transform:translateY(-2px); }
+
+    /* dataset card */
+    .dataset-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--r-lg);
+      padding:28px;
+      backdrop-filter:blur(24px) saturate(180%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.75), var(--shadow);
+    }
+    .dataset-card-title { font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-subtle); margin-bottom:18px; }
+    .ds-stat { margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+    .ds-stat:last-child { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+    .ds-stat-lbl { font-size:.72rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--fg-subtle); margin-bottom:4px; }
+    .ds-stat-val { font-family:'Inter Tight',sans-serif; font-size:1.5rem; font-weight:800; letter-spacing:-.04em; color:var(--fg); }
+    .ds-stat-sub { font-size:.75rem; color:var(--fg-muted); margin-top:2px; }
+    .class-bar { display:flex; height:8px; border-radius:999px; overflow:hidden; margin-top:10px; gap:2px; }
+    .cb-green { background:var(--green); }
+    .cb-terra  { background:var(--terra); }
+    .class-legend { display:flex; gap:14px; margin-top:8px; }
+    .cl-item { display:flex; align-items:center; gap:5px; font-size:.72rem; font-weight:600; color:var(--fg-muted); }
+    .cl-dot  { width:8px; height:8px; border-radius:50%; }
+
+    /* =====================================================
+       TOC / SIDEBAR LAYOUT
+    ===================================================== */
+    .doc-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+    .toc {
+      position: sticky; top: 80px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px;
+      backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), var(--shadow-sm);
+    }
+    .toc-title { font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-subtle); margin-bottom:14px; }
+    .toc-list { list-style:none; display:flex; flex-direction:column; gap:2px; }
+    .toc-item a {
+      font-size:.82rem; font-weight:500; color:var(--fg-muted);
+      text-decoration:none; padding:7px 12px;
+      border-radius:var(--r-sm); display:block;
+      transition: color .2s, background .2s;
+      border-left: 2px solid transparent;
+    }
+    .toc-item a:hover   { color:var(--fg); background:rgba(10,14,12,.05); border-left-color:var(--border-md); }
+    .toc-item a.active  { color:var(--green); background:var(--green-soft); border-left-color:var(--green); font-weight:600; }
+    .toc-item.sub a  { padding-left:22px; font-size:.78rem; }
+    .toc-sep { height:1px; background:var(--border); margin:10px 0; }
+
+    /* =====================================================
+       SECTION SHARED STYLES
+    ===================================================== */
+    .section-label {
+      display:inline-flex; align-items:center; gap:7px;
+      font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--green); background:var(--green-soft); border:1px solid rgba(31,122,61,.18);
+      padding:4px 12px; border-radius:999px; margin-bottom:16px;
+    }
+    .section-label-dot { width:5px; height:5px; border-radius:50%; background:var(--green); }
+    .section-label.terra { color:var(--terra); background:var(--terra-soft); border-color:rgba(200,90,46,.18); }
+    .section-label.terra .section-label-dot { background:var(--terra); }
+    .section-label.blue  { color:var(--blue); background:var(--blue-soft); border-color:rgba(37,99,235,.18); }
+    .section-label.blue  .section-label-dot { background:var(--blue); }
+
+    .section-h2 { font-size:clamp(1.7rem,3.5vw,2.4rem); color:var(--fg); margin-bottom:10px; }
+    .section-sub { font-size:.97rem; color:var(--fg-muted); max-width:600px; line-height:1.7; }
+    .rule { width:36px; height:2px; background:linear-gradient(90deg,var(--green),transparent); border-radius:2px; margin-bottom:20px; }
+
+    .glass-panel {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:28px;
+      backdrop-filter:blur(24px) saturate(180%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.72), var(--shadow-sm);
+    }
+    .divider { height:1px; background:var(--border); margin:0; }
+
+    /* =====================================================
+       FEATURE TABLE
+    ===================================================== */
+    .feature-table-wrap { overflow-x:auto; margin-top:32px; border-radius:var(--r); border:1px solid var(--border); box-shadow:var(--shadow-sm); }
+    table { width:100%; border-collapse:collapse; background:var(--surface-hi); }
+    thead tr { background:rgba(10,14,12,.03); }
+    thead th {
+      font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--fg-subtle); padding:14px 16px; text-align:left;
+      border-bottom:1px solid var(--border);
+    }
+    tbody tr { border-bottom:1px solid var(--border); transition:background .15s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:rgba(31,122,61,.04); }
+    td { padding:14px 16px; font-size:.86rem; vertical-align:top; }
+    .td-name { font-weight:700; color:var(--fg); font-family:'Inter Tight',sans-serif; letter-spacing:-.02em; white-space:nowrap; }
+    .td-type { white-space:nowrap; }
+    .td-desc { color:var(--fg-muted); line-height:1.55; }
+    .td-impact { white-space:nowrap; }
+    .td-range { color:var(--fg-muted); font-size:.8rem; white-space:nowrap; }
+
+    .type-tag {
+      display:inline-flex; align-items:center; gap:4px;
+      font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:999px;
+    }
+    .t-num  { background:var(--blue-soft);   color:var(--blue); }
+    .t-cat  { background:var(--terra-soft);  color:var(--terra); }
+    .t-bool { background:rgba(124,58,237,.09); color:#7c3aed; }
+
+    .impact-bar-wrap { display:flex; align-items:center; gap:8px; }
+    .impact-bar-track { width:80px; height:5px; background:rgba(10,14,12,.08); border-radius:999px; flex-shrink:0; }
+    .impact-bar-fill  { height:100%; border-radius:999px; }
+    .ib-high   { background:linear-gradient(90deg,var(--green),#4ade80); }
+    .ib-med    { background:linear-gradient(90deg,var(--terra),#fbbf24); }
+    .ib-low    { background:linear-gradient(90deg,var(--fg-subtle),var(--fg-subtle)); }
+    .impact-lbl { font-size:.72rem; font-weight:700; }
+    .il-high { color:var(--green); }
+    .il-med  { color:var(--terra); }
+    .il-low  { color:var(--fg-subtle); }
+
+    /* =====================================================
+       FEATURE CARDS (engineered)
+    ===================================================== */
+    .eng-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:28px; }
+    .eng-card {
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:var(--r-sm);
+      padding:20px 22px;
+      transition:transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s, border-color .3s;
+    }
+    .eng-card:hover { transform:translateY(-4px); box-shadow:var(--shadow); border-color:var(--green-glow); }
+    .eng-card-name { font-size:.88rem; font-weight:700; letter-spacing:-.02em; color:var(--fg); margin-bottom:5px; }
+    .eng-card-formula { font-size:.78rem; color:var(--green); font-weight:600; margin-bottom:8px; }
+    .eng-card-desc { font-size:.82rem; color:var(--fg-muted); line-height:1.6; }
+
+    /* =====================================================
+       MODEL COMPARISON
+    ===================================================== */
+    .model-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:28px; }
+    .model-card {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:var(--r); padding:22px;
+      transition:all .4s cubic-bezier(.2,.7,.2,1);
+      position:relative; overflow:hidden;
+    }
+    .model-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:var(--border-md); }
+    .model-card.best {
+      background:var(--fg); border-color:var(--fg);
+      box-shadow:var(--shadow-xl);
+    }
+    .model-card.best .mc-name  { color:rgba(244,245,240,.85); }
+    .model-card.best .mc-score { color:#fff; }
+    .model-card.best .mc-label { color:rgba(244,245,240,.5); }
+    .model-card.best .mc-bar-track { background:rgba(255,255,255,.12); }
+    .best-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(166,247,84,.15); color:#a6f754;
+      border:1px solid rgba(166,247,84,.25);
+      font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:999px;
+      margin-bottom:14px;
+    }
+    .mc-name  { font-size:.9rem; font-weight:700; letter-spacing:-.02em; color:var(--fg); margin-bottom:16px; }
+    .mc-score { font-family:'Inter Tight',sans-serif; font-size:1.7rem; font-weight:900; letter-spacing:-.05em; color:var(--fg); line-height:1; margin-bottom:4px; }
+    .mc-label { font-size:.72rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--fg-subtle); margin-bottom:14px; }
+    .mc-bar-track { height:5px; background:rgba(10,14,12,.08); border-radius:999px; overflow:hidden; margin-top:4px; }
+    .mc-bar-fill  { height:100%; border-radius:999px; background:linear-gradient(90deg,var(--green),#4ade80); transition:width .9s cubic-bezier(.2,.7,.2,1); }
+    .mc-bar-fill.best-bar { background:linear-gradient(90deg,#a6f754,#4ade80); }
+
+    /* =====================================================
+       PERFORMANCE METRICS
+    ===================================================== */
+    .perf-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; margin-top:28px; }
+    .perf-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--r); padding:22px;
+      backdrop-filter:blur(20px) saturate(170%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.7), var(--shadow-sm);
+      text-align:center;
+    }
+    .perf-val { font-family:'Inter Tight',sans-serif; font-size:2rem; font-weight:900; letter-spacing:-.05em; line-height:1; margin-bottom:5px; }
+    .perf-lbl { font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--fg-subtle); }
+    .pv-green  { color:var(--green); }
+    .pv-blue   { color:var(--blue); }
+    .pv-terra  { color:var(--terra); }
+    .pv-dark   { color:var(--fg); }
+
+    /* confusion matrix */
+    .cm-wrap { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:24px; max-width:520px; }
+    .cm-cell {
+      border-radius:var(--r-sm); padding:22px;
+      text-align:center;
+    }
+    .cm-tn { background:var(--green-soft); border:1px solid rgba(31,122,61,.18); }
+    .cm-fp { background:var(--terra-soft); border:1px solid rgba(200,90,46,.18); }
+    .cm-fn { background:var(--terra-soft); border:1px solid rgba(200,90,46,.18); }
+    .cm-tp { background:var(--green-soft); border:1px solid rgba(31,122,61,.18); }
+    .cm-num { font-family:'Inter Tight',sans-serif; font-size:1.8rem; font-weight:900; letter-spacing:-.04em; }
+    .cm-lbl { font-size:.72rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; margin-top:5px; }
+    .cm-tn .cm-num, .cm-tp .cm-num { color:var(--green); }
+    .cm-fp .cm-num, .cm-fn .cm-num { color:var(--terra); }
+    .cm-tn .cm-lbl, .cm-tp .cm-lbl { color:var(--green); }
+    .cm-fp .cm-lbl, .cm-fn .cm-lbl { color:var(--terra); }
+
+    /* =====================================================
+       PIPELINE
+    ===================================================== */
+    .pipeline-steps { display:flex; flex-direction:column; gap:0; margin-top:28px; }
+    .pipe-step {
+      display:flex; gap:20px; align-items:flex-start;
+      padding:20px 0;
+      border-bottom:1px solid var(--border);
+      position:relative;
+    }
+    .pipe-step:last-child { border-bottom:none; }
+    .pipe-step-num {
+      width:38px; height:38px; flex-shrink:0;
+      border-radius:11px; background:var(--green-soft);
+      border:1px solid rgba(31,122,61,.2);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Inter Tight',sans-serif; font-size:.88rem; font-weight:800;
+      color:var(--green); margin-top:2px;
+    }
+    .pipe-step-body h4 { font-size:.97rem; margin-bottom:6px; letter-spacing:-.02em; }
+    .pipe-step-body p  { font-size:.86rem; color:var(--fg-muted); line-height:1.6; }
+    .pipe-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .ptag {
+      font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:999px;
+      background:var(--bg); border:1px solid var(--border); color:var(--fg-muted);
+    }
+    .ptag.green  { background:var(--green-soft); color:var(--green); border-color:rgba(31,122,61,.2); }
+    .ptag.terra  { background:var(--terra-soft); color:var(--terra); border-color:rgba(200,90,46,.2); }
+    .ptag.blue   { background:var(--blue-soft); color:var(--blue); border-color:rgba(37,99,235,.2); }
+
+    /* =====================================================
+       THRESHOLD EXPLAINER
+    ===================================================== */
+    .thresh-visual {
+      position:relative; height:12px;
+      background:linear-gradient(90deg, var(--green-soft) 0%, var(--terra-soft) 100%);
+      border-radius:999px; margin:16px 0;
+      border:1px solid var(--border);
+    }
+    .thresh-line {
+      position:absolute; top:-8px; bottom:-8px; width:2px;
+      background:var(--fg); border-radius:2px;
+    }
+    .thresh-label {
+      position:absolute; top:-28px;
+      font-size:.72rem; font-weight:700; color:var(--fg);
+      transform:translateX(-50%);
+      white-space:nowrap;
+    }
+    .thresh-label::after {
+      content:'';
+      position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      width:1px; height:10px; background:var(--fg-subtle);
+    }
+    .thresh-ends { display:flex; justify-content:space-between; font-size:.75rem; font-weight:600; color:var(--fg-muted); margin-top:4px; }
+
+    /* =====================================================
+       CALLOUT
+    ===================================================== */
+    .callout {
+      display:flex; gap:14px; align-items:flex-start;
+      padding:18px 20px; border-radius:var(--r-sm);
+      margin-top:20px;
+    }
+    .callout-green { background:var(--green-soft); border:1px solid rgba(31,122,61,.2); }
+    .callout-terra { background:var(--terra-soft); border:1px solid rgba(200,90,46,.2); }
+    .callout-blue  { background:var(--blue-soft);  border:1px solid rgba(37,99,235,.2); }
+    .callout-icon { font-size:1.1rem; flex-shrink:0; margin-top:2px; }
+    .callout-body h4 { font-size:.88rem; margin-bottom:4px; }
+    .callout-body p  { font-size:.84rem; color:var(--fg-muted); line-height:1.6; }
+    .callout-green h4 { color:var(--green); }
+    .callout-terra h4 { color:var(--terra); }
+    .callout-blue  h4 { color:var(--blue); }
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+    footer { background:var(--fg); padding:48px 0 36px; }
+    .footer-inner { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:28px; }
+    .footer-brand { font-family:'Inter Tight',sans-serif; font-weight:800; font-size:1.2rem; letter-spacing:-.05em; color:var(--bg); margin-bottom:6px; }
+    .footer-sub { font-size:.8rem; color:rgba(244,245,240,.38); max-width:300px; line-height:1.6; }
+    .footer-links { display:flex; gap:4px; flex-wrap:wrap; }
+    .footer-link { font-size:.78rem; font-weight:500; color:rgba(244,245,240,.4); text-decoration:none; padding:6px 12px; border:1px solid rgba(244,245,240,.08); border-radius:999px; transition:all .2s; }
+    .footer-link:hover { color:var(--bg); border-color:rgba(244,245,240,.25); background:rgba(244,245,240,.06); }
+    .footer-copy { font-size:.72rem; color:rgba(244,245,240,.22); margin-top:36px; padding-top:20px; border-top:1px solid rgba(244,245,240,.07); text-align:center; }
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+    @media(max-width:1000px) { .doc-layout { grid-template-columns:1fr; } .toc { display:none; } }
+    @media(max-width:860px)  { .hero-doc-inner { grid-template-columns:1fr; } .dataset-card { display:none; } .model-grid { grid-template-columns:1fr 1fr; } .perf-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:640px)  { .model-grid { grid-template-columns:1fr; } .eng-grid { grid-template-columns:1fr; } nav .nav-pill { display:none; } }
+    @media(max-width:480px)  { .perf-grid { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-brand" href="index.html">
+    <div class="nav-brand-mark">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    ShopperAI
+  </a>
+  <div class="nav-pill">
+    <a class="nav-link" href="index.html">Home</a>
+    <a class="nav-link active" href="docs.html">Dataset Docs</a>
+    <a class="nav-link" href="index.html#dashboard">Dashboard</a>
+    <a class="nav-link" href="https://xstynwx-online-shoppers-api.hf.space/docs" target="_blank">API ↗</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-chip"><span class="nav-chip-dot"></span> Kaggle Dataset</div>
+    <a class="nav-btn" href="index.html#dashboard">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Try Prediction
+    </a>
+  </div>
+</nav>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+<section class="hero-doc">
+  <div class="mesh"></div>
+  <div class="container">
+    <div class="hero-doc-inner">
+      <div>
+        <div class="hero-doc-eyebrow"><span class="eyebrow-rule"></span> Dataset Documentation</div>
+        <h1>Online Shoppers<br><span class="serif">Intention Dataset</span></h1>
+        <p>A complete reference for every input field, feature contribution, preprocessing pipeline, and model performance behind the ShopperAI purchase prediction system.</p>
+        <div class="hero-meta">
+          <div class="meta-pill"><span class="dot dot-green"></span> 12,330 Sessions</div>
+          <div class="meta-pill"><span class="dot dot-blue"></span> 17 Input Features</div>
+          <div class="meta-pill"><span class="dot dot-terra"></span> Binary Classification</div>
+          <div class="meta-pill"><span class="dot dot-orange"></span> Kaggle Source</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="btn-doc btn-doc-dark" href="https://www.kaggle.com/datasets/henrysue/online-shoppers-intention" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            View on Kaggle
+          </a>
+          <a class="btn-doc btn-doc-ghost" href="index.html#dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Open Dashboard
+          </a>
+        </div>
+      </div>
+      <div class="dataset-card">
+        <div class="dataset-card-title">Dataset At a Glance</div>
+        <div class="ds-stat">
+          <div class="ds-stat-lbl">Total Sessions</div>
+          <div class="ds-stat-val">12,199</div>
+          <div class="ds-stat-sub">After removing 131 duplicate rows</div>
+        </div>
+        <div class="ds-stat">
+          <div class="ds-stat-lbl">Class Distribution</div>
+          <div class="class-bar">
+            <div class="cb-green" style="flex:84.5"></div>
+            <div class="cb-terra"  style="flex:15.5"></div>
+          </div>
+          <div class="class-legend">
+            <div class="cl-item"><span class="cl-dot" style="background:var(--green)"></span>Not Purchased 84.5%</div>
+            <div class="cl-item"><span class="cl-dot" style="background:var(--terra)"></span>Purchased 15.5%</div>
+          </div>
+        </div>
+        <div class="ds-stat">
+          <div class="ds-stat-lbl">Best Model</div>
+          <div class="ds-stat-val" style="font-size:1.1rem;">Hist. Gradient Boosting</div>
+          <div class="ds-stat-sub">PR-AUC 0.7585 · ROC-AUC 0.9327</div>
+        </div>
+        <div class="ds-stat">
+          <div class="ds-stat-lbl">Prediction Threshold</div>
+          <div class="ds-stat-val">0.49</div>
+          <div class="ds-stat-sub">Optimized via F1-score tuning</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- =====================================================
+     MAIN DOC LAYOUT
+===================================================== -->
+<section class="section-pad" style="background:var(--bg);">
+  <div class="container">
+    <div class="doc-layout">
+
+      <!-- TOC -->
+      <nav class="toc" aria-label="Table of contents">
+        <div class="toc-title">On This Page</div>
+        <ul class="toc-list">
+          <li class="toc-item"><a href="#overview" class="active">Overview</a></li>
+          <li class="toc-item"><a href="#features">Input Features</a></li>
+          <li class="toc-item sub"><a href="#features">→ Numerical</a></li>
+          <li class="toc-item sub"><a href="#features">→ Categorical</a></li>
+          <li class="toc-sep"></li>
+          <li class="toc-item"><a href="#engineered">Engineered Features</a></li>
+          <li class="toc-item"><a href="#pipeline">Preprocessing Pipeline</a></li>
+          <li class="toc-item"><a href="#models">Model Comparison</a></li>
+          <li class="toc-item"><a href="#performance">Final Performance</a></li>
+          <li class="toc-item"><a href="#threshold">Threshold & Output</a></li>
+          <li class="toc-sep"></li>
+          <li class="toc-item"><a href="#usage">API Usage</a></li>
+        </ul>
+      </nav>
+
+      <!-- CONTENT -->
+      <div class="doc-content">
+
+        <!-- ── OVERVIEW ── -->
+        <div id="overview" style="margin-bottom:72px;">
+          <div class="section-label"><span class="section-label-dot"></span> Overview</div>
+          <h2 class="section-h2">What is this dataset?</h2>
+          <p class="section-sub">The Online Shoppers Intention dataset was collected from an e-commerce platform over one year. Each row represents a single browsing session, and the goal is to predict whether that session will end in a purchase.</p>
+
+          <div class="glass-panel" style="margin-top:28px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;">
+              <div style="padding:16px 20px;border-right:1px solid var(--border);">
+                <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle);margin-bottom:6px;">Source</div>
+                <div style="font-size:.9rem;font-weight:700;color:var(--fg);">Kaggle / UCI ML Repo</div>
+                <div style="font-size:.78rem;color:var(--fg-muted);margin-top:2px;">by Henry Sue</div>
+              </div>
+              <div style="padding:16px 20px;border-right:1px solid var(--border);">
+                <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle);margin-bottom:6px;">Task Type</div>
+                <div style="font-size:.9rem;font-weight:700;color:var(--fg);">Binary Classification</div>
+                <div style="font-size:.78rem;color:var(--fg-muted);margin-top:2px;">Predict Revenue (0 or 1)</div>
+              </div>
+              <div style="padding:16px 20px;">
+                <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle);margin-bottom:6px;">Imbalance</div>
+                <div style="font-size:.9rem;font-weight:700;color:var(--fg);">84.5% vs 15.5%</div>
+                <div style="font-size:.78rem;color:var(--fg-muted);margin-top:2px;">Handled via <code>balanced</code> weights</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-terra" style="margin-top:16px;">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-body">
+              <h4>Class Imbalance Note</h4>
+              <p>Only ~15.5% of sessions result in a purchase. This imbalance was addressed using <code>class_weight="balanced"</code> in tree-based models and optimizing for <strong>PR-AUC</strong> (Precision-Recall Area Under Curve) instead of accuracy, which is a more informative metric for imbalanced datasets.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── FEATURES ── -->
+        <div id="features" style="margin-bottom:72px;">
+          <div class="section-label"><span class="section-label-dot"></span> Input Features</div>
+          <h2 class="section-h2">All 17 Input Fields</h2>
+          <p class="section-sub">These are the raw features available from the dataset that are sent directly to the prediction API. Impact levels reflect observed influence on the <code>Revenue</code> target.</p>
+
+          <!-- NUMERICAL FEATURES TABLE -->
+          <h3 style="font-size:1rem;letter-spacing:-.02em;margin:32px 0 -4px;color:var(--fg-muted);font-weight:600;">
+            <span style="display:inline-flex;align-items:center;gap:7px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block;"></span>
+              Numerical Features (10)
+            </span>
+          </h3>
+          <div class="feature-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field Name</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Range</th>
+                  <th>Impact</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-name">PageValues</td>
+                  <td class="td-type"><span class="type-tag t-num">float</span></td>
+                  <td class="td-desc">Average value of pages viewed before completing an e-commerce transaction. Pages contributing to a purchase are weighted by their transactional value.</td>
+                  <td class="td-range">0 – 361.76</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-high" style="width:95%"></div></div>
+                      <span class="impact-lbl il-high">High</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">ProductRelated</td>
+                  <td class="td-type"><span class="type-tag t-num">int</span></td>
+                  <td class="td-desc">Number of product-related pages visited during the session. High counts indicate active product exploration.</td>
+                  <td class="td-range">0 – 705</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-high" style="width:80%"></div></div>
+                      <span class="impact-lbl il-high">High</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">ProductRelated_Duration</td>
+                  <td class="td-type"><span class="type-tag t-num">float</span></td>
+                  <td class="td-desc">Total time (seconds) spent on product-related pages. Longer time suggests deeper product consideration.</td>
+                  <td class="td-range">0 – 63,974 s</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-high" style="width:75%"></div></div>
+                      <span class="impact-lbl il-high">High</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">BounceRates</td>
+                  <td class="td-type"><span class="type-tag t-num">float</span></td>
+                  <td class="td-desc">Percentage of visitors who enter and immediately exit the site from that page, without any further interaction. Lower values indicate more engaged visitors.</td>
+                  <td class="td-range">0.0 – 0.20</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-med" style="width:60%"></div></div>
+                      <span class="impact-lbl il-med">Medium</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">ExitRates</td>
+                  <td class="td-type"><span class="type-tag t-num">float</span></td>
+                  <td class="td-desc">For each page, the percentage of all sessions that ended on that page. Different from bounce rate — applies even if the user visited other pages first.</td>
+                  <td class="td-range">0.0 – 0.20</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-med" style="width:58%"></div></div>
+                      <span class="impact-lbl il-med">Medium</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Administrative</td>
+                  <td class="td-type"><span class="type-tag t-num">int</span></td>
+                  <td class="td-desc">Number of administrative pages visited (e.g. account management, order history, settings pages).</td>
+                  <td class="td-range">0 – 27</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:32%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Administrative_Duration</td>
+                  <td class="td-type"><span class="type-tag t-num">float</span></td>
+                  <td class="td-desc">Total time (seconds) spent on administrative pages during the session.</td>
+                  <td class="td-range">0 – 3,399 s</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:28%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Informational</td>
+                  <td class="td-type"><span class="type-tag t-num">int</span></td>
+                  <td class="td-desc">Number of informational pages visited (e.g. about us, contact, FAQ, shipping info).</td>
+                  <td class="td-range">0 – 24</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:22%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Informational_Duration</td>
+                  <td class="td-type"><span class="type-tag t-num">float</span></td>
+                  <td class="td-desc">Total time (seconds) spent on informational pages during the session.</td>
+                  <td class="td-range">0 – 2,549 s</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:20%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">SpecialDay</td>
+                  <td class="td-type"><span class="type-tag t-num">float</span></td>
+                  <td class="td-desc">Indicates how close the session date is to a special shopping day (e.g. Mother's Day, Valentine's). 0.0 = not close, 1.0 = very close.</td>
+                  <td class="td-range">0.0 – 1.0</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:18%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- CATEGORICAL FEATURES TABLE -->
+          <h3 style="font-size:1rem;letter-spacing:-.02em;margin:36px 0 -4px;color:var(--fg-muted);font-weight:600;">
+            <span style="display:inline-flex;align-items:center;gap:7px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--terra);display:inline-block;"></span>
+              Categorical Features (7)
+            </span>
+          </h3>
+          <div class="feature-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field Name</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Values</th>
+                  <th>Impact</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-name">VisitorType</td>
+                  <td class="td-type"><span class="type-tag t-cat">string</span></td>
+                  <td class="td-desc">Whether the visitor is returning to the site or visiting for the first time. Returning visitors tend to have higher purchase intent.</td>
+                  <td class="td-range" style="font-size:.78rem;">Returning_Visitor<br>New_Visitor<br>Other</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-med" style="width:55%"></div></div>
+                      <span class="impact-lbl il-med">Medium</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Month</td>
+                  <td class="td-type"><span class="type-tag t-cat">string</span></td>
+                  <td class="td-desc">Month of the year the session occurred. Seasonality plays a role — November and December show higher purchase rates due to holidays.</td>
+                  <td class="td-range" style="font-size:.78rem;">Feb, Mar, May, June,<br>Jul, Aug, Sep, Oct,<br>Nov, Dec</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-med" style="width:45%"></div></div>
+                      <span class="impact-lbl il-med">Medium</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">TrafficType</td>
+                  <td class="td-type"><span class="type-tag t-cat">int code</span></td>
+                  <td class="td-desc">Integer code representing how the visitor arrived at the site (e.g. direct, referral, paid search, social media). Different traffic sources have different conversion rates.</td>
+                  <td class="td-range">1 – 20</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-med" style="width:40%"></div></div>
+                      <span class="impact-lbl il-med">Medium</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Region</td>
+                  <td class="td-type"><span class="type-tag t-cat">int code</span></td>
+                  <td class="td-desc">Geographic region of the visitor (anonymized integer code). Regional purchasing patterns may vary significantly.</td>
+                  <td class="td-range">1 – 9</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:30%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">OperatingSystems</td>
+                  <td class="td-type"><span class="type-tag t-cat">int code</span></td>
+                  <td class="td-desc">Operating system used by the visitor (anonymized integer code). Device type inferred from OS may weakly correlate with purchase behavior.</td>
+                  <td class="td-range">1 – 8</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:22%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Browser</td>
+                  <td class="td-type"><span class="type-tag t-cat">int code</span></td>
+                  <td class="td-desc">Browser used by the visitor (anonymized integer code). Has minimal direct predictive power but contributes marginally to the model.</td>
+                  <td class="td-range">1 – 13</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:18%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="td-name">Weekend</td>
+                  <td class="td-type"><span class="type-tag t-bool">boolean</span></td>
+                  <td class="td-desc">Whether the session occurred on a weekend. Weekday vs weekend browsing patterns differ slightly in conversion likelihood.</td>
+                  <td class="td-range">true / false</td>
+                  <td class="td-impact">
+                    <div class="impact-bar-wrap">
+                      <div class="impact-bar-track"><div class="impact-bar-fill ib-low" style="width:15%"></div></div>
+                      <span class="impact-lbl il-low">Low</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-blue" style="margin-top:20px;">
+            <div class="callout-icon">ℹ️</div>
+            <div class="callout-body">
+              <h4>About PageValues</h4>
+              <p><code>PageValues</code> is technically a <em>data leakage</em> candidate — it's computed using transactional data that only exists after a purchase. In real-time prediction, this value may be 0 for all sessions (since no transaction has occurred yet). For demo purposes the API accepts it, and non-zero values will strongly push the prediction toward "Will Purchase".</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ENGINEERED FEATURES ── -->
+        <div id="engineered" style="margin-bottom:72px;">
+          <div class="section-label terra"><span class="section-label-dot"></span> Feature Engineering</div>
+          <h2 class="section-h2">Engineered Features</h2>
+          <p class="section-sub">These features were derived from the raw inputs to capture richer behavioral signals. They are computed automatically inside the model pipeline — you do <strong>not</strong> need to provide them as inputs.</p>
+
+          <div class="eng-grid">
+            <div class="eng-card">
+              <div class="eng-card-name">TotalDuration</div>
+              <div class="eng-card-formula">= Admin_Duration + Info_Duration + Product_Duration</div>
+              <div class="eng-card-desc">Total time the visitor spent on the website during the session. Users spending more total time generally show higher purchase engagement.</div>
+            </div>
+            <div class="eng-card">
+              <div class="eng-card-name">TotalPages</div>
+              <div class="eng-card-formula">= Administrative + Informational + ProductRelated</div>
+              <div class="eng-card-desc">Total number of pages visited. Users who explore many pages are likely in an active decision-making or comparison phase.</div>
+            </div>
+            <div class="eng-card">
+              <div class="eng-card-name">ProductDurationPerPage</div>
+              <div class="eng-card-formula">= ProductRelated_Duration / ProductRelated</div>
+              <div class="eng-card-desc">Average time per product page. Deep dwell time per product page is a strong signal of genuine purchase consideration.</div>
+            </div>
+            <div class="eng-card">
+              <div class="eng-card-name">ProductEngagement</div>
+              <div class="eng-card-formula">= ProductRelated × ProductRelated_Duration</div>
+              <div class="eng-card-desc">Combined engagement score measuring breadth (pages visited) × depth (time spent). A high score is the strongest composite purchase signal.</div>
+            </div>
+            <div class="eng-card">
+              <div class="eng-card-name">ExitBounceGap</div>
+              <div class="eng-card-formula">= ExitRates − BounceRates</div>
+              <div class="eng-card-desc">Measures how much exit behavior exceeds single-page bounce behavior. A positive gap indicates users are leaving after exploring, not just bouncing immediately.</div>
+            </div>
+            <div class="eng-card">
+              <div class="eng-card-name">DurationWeightedExit</div>
+              <div class="eng-card-formula">= TotalDuration × ExitRates</div>
+              <div class="eng-card-desc">Combines session length with exit tendency. Long sessions with high exit rates may indicate research without intent to buy.</div>
+            </div>
+            <div class="eng-card">
+              <div class="eng-card-name">ProductPageRatio</div>
+              <div class="eng-card-formula">= ProductRelated / TotalPages</div>
+              <div class="eng-card-desc">Proportion of the session focused on product pages. Higher ratios indicate a product-browsing session rather than an informational one.</div>
+            </div>
+            <div class="eng-card">
+              <div class="eng-card-name">Log-transformed Durations</div>
+              <div class="eng-card-formula">= log1p(duration_feature)</div>
+              <div class="eng-card-desc">Duration features are highly right-skewed with extreme outliers. Log1p transformation compresses the scale and stabilizes model training.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PIPELINE ── -->
+        <div id="pipeline" style="margin-bottom:72px;">
+          <div class="section-label"><span class="section-label-dot"></span> Preprocessing Pipeline</div>
+          <h2 class="section-h2">How Raw Data Becomes a Prediction</h2>
+          <p class="section-sub">The model uses a <code>sklearn</code> Pipeline that automatically handles imputation, encoding, and scaling before feeding data to the classifier.</p>
+
+          <div class="pipeline-steps">
+            <div class="pipe-step">
+              <div class="pipe-step-num">1</div>
+              <div class="pipe-step-body">
+                <h4>Feature Engineering</h4>
+                <p>TotalDuration, TotalPages, ratios, engagement scores, and log-transformed duration features are derived from the raw 17 inputs. This step adds 20+ additional features that help the model capture non-linear behavioral patterns.</p>
+                <div class="pipe-tags"><span class="ptag green">+20 derived features</span><span class="ptag">log1p transform</span><span class="ptag">ratio engineering</span></div>
+              </div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-step-num">2</div>
+              <div class="pipe-step-body">
+                <h4>Missing Value Imputation</h4>
+                <p>Numerical columns use <strong>median imputation</strong> (robust to outliers). Categorical columns use <strong>most-frequent imputation</strong>. The dataset had a small percentage of missing values in numeric features only.</p>
+                <div class="pipe-tags"><span class="ptag blue">SimpleImputer(strategy="median")</span><span class="ptag terra">SimpleImputer(strategy="most_frequent")</span></div>
+              </div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-step-num">3</div>
+              <div class="pipe-step-body">
+                <h4>Numerical Scaling</h4>
+                <p><code>RobustScaler</code> is used instead of StandardScaler because duration and page-count features contain significant outliers. RobustScaler centers using the median and scales using the IQR, making it resistant to extreme values.</p>
+                <div class="pipe-tags"><span class="ptag green">RobustScaler</span><span class="ptag">Outlier-resistant</span><span class="ptag">IQR-based scaling</span></div>
+              </div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-step-num">4</div>
+              <div class="pipe-step-body">
+                <h4>Categorical Encoding</h4>
+                <p><code>OneHotEncoder</code> with <code>min_frequency=10</code> is applied to Month, VisitorType, Weekend, and the integer-code columns (OperatingSystems, Browser, Region, TrafficType). Rare categories are grouped as "infrequent."</p>
+                <div class="pipe-tags"><span class="ptag terra">OneHotEncoder</span><span class="ptag">handle_unknown="ignore"</span><span class="ptag">min_frequency=10</span></div>
+              </div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-step-num">5</div>
+              <div class="pipe-step-body">
+                <h4>ColumnTransformer</h4>
+                <p>A <code>ColumnTransformer</code> applies the numeric and categorical pipelines in parallel and combines the results into a single feature matrix before passing to the classifier.</p>
+                <div class="pipe-tags"><span class="ptag green">ColumnTransformer</span><span class="ptag">Parallel processing</span></div>
+              </div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-step-num">6</div>
+              <div class="pipe-step-body">
+                <h4>Classification</h4>
+                <p>The preprocessed features are fed into the best-performing classifier. All steps — including feature engineering — are serialized into a single <code>.pkl</code> file so the API only needs raw inputs.</p>
+                <div class="pipe-tags"><span class="ptag green">HistGradientBoostingClassifier</span><span class="ptag">joblib serialized</span><span class="ptag">predict_proba</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MODELS ── -->
+        <div id="models" style="margin-bottom:72px;">
+          <div class="section-label"><span class="section-label-dot"></span> Model Comparison</div>
+          <h2 class="section-h2">Six Models Trained & Compared</h2>
+          <p class="section-sub">All models were evaluated using <strong>5-fold Stratified Cross-Validation</strong> with <strong>PR-AUC</strong> as the scoring metric, followed by hyperparameter tuning via <code>RandomizedSearchCV</code>.</p>
+
+          <div class="model-grid" id="modelGrid">
+            <div class="model-card best">
+              <div class="best-badge">★ Best Model</div>
+              <div class="mc-name">Hist Gradient Boosting</div>
+              <div class="mc-score">0.7585</div>
+              <div class="mc-label">CV PR-AUC</div>
+              <div class="mc-bar-track"><div class="mc-bar-fill best-bar" data-w="100"></div></div>
+            </div>
+            <div class="model-card">
+              <div class="mc-name">Soft Voting Ensemble</div>
+              <div class="mc-score">0.7561</div>
+              <div class="mc-label">CV PR-AUC</div>
+              <div class="mc-bar-track"><div class="mc-bar-fill" data-w="97"></div></div>
+            </div>
+            <div class="model-card">
+              <div class="mc-name">Gradient Boosting</div>
+              <div class="mc-score">0.7541</div>
+              <div class="mc-label">CV PR-AUC</div>
+              <div class="mc-bar-track"><div class="mc-bar-fill" data-w="95"></div></div>
+            </div>
+            <div class="model-card">
+              <div class="mc-name">Random Forest</div>
+              <div class="mc-score">0.7538</div>
+              <div class="mc-label">CV PR-AUC</div>
+              <div class="mc-bar-track"><div class="mc-bar-fill" data-w="94"></div></div>
+            </div>
+            <div class="model-card">
+              <div class="mc-name">Extra Trees</div>
+              <div class="mc-score">0.7391</div>
+              <div class="mc-label">CV PR-AUC</div>
+              <div class="mc-bar-track"><div class="mc-bar-fill" data-w="85"></div></div>
+            </div>
+            <div class="model-card">
+              <div class="mc-name">Logistic Regression</div>
+              <div class="mc-score">0.6644</div>
+              <div class="mc-label">CV PR-AUC</div>
+              <div class="mc-bar-track"><div class="mc-bar-fill" data-w="52"></div></div>
+            </div>
+          </div>
+
+          <div class="callout callout-green" style="margin-top:20px;">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">
+              <h4>Why PR-AUC over Accuracy?</h4>
+              <p>With 84.5% of sessions being non-purchases, a naive model predicting "no purchase" every time would achieve 84.5% accuracy — but be completely useless. PR-AUC measures performance specifically on the minority (purchase) class, penalizing models that simply predict the majority class and rewarding those that correctly identify true buyers.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PERFORMANCE ── -->
+        <div id="performance" style="margin-bottom:72px;">
+          <div class="section-label blue"><span class="section-label-dot"></span> Final Performance</div>
+          <h2 class="section-h2">Test Set Results — Hist Gradient Boosting</h2>
+          <p class="section-sub">Performance on the held-out test set (20% of data, ~2,445 sessions), never seen during training or hyperparameter tuning.</p>
+
+          <div class="perf-grid">
+            <div class="perf-card">
+              <div class="perf-val pv-dark">90.5%</div>
+              <div class="perf-lbl">Accuracy</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-val pv-green">0.9327</div>
+              <div class="perf-lbl">ROC-AUC</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-val pv-blue">0.7415</div>
+              <div class="perf-lbl">PR-AUC</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-val pv-terra">0.0707</div>
+              <div class="perf-lbl">Brier Score ↓</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;align-items:start;">
+            <div>
+              <h4 style="font-size:.88rem;margin-bottom:14px;color:var(--fg-muted);font-weight:600;">Confusion Matrix (Threshold = 0.49)</h4>
+              <div class="cm-wrap">
+                <div class="cm-cell cm-tn">
+                  <div class="cm-num">1,969</div>
+                  <div class="cm-lbl">True Negative</div>
+                </div>
+                <div class="cm-cell cm-fp">
+                  <div class="cm-num">94</div>
+                  <div class="cm-lbl">False Positive</div>
+                </div>
+                <div class="cm-cell cm-fn">
+                  <div class="cm-num">139</div>
+                  <div class="cm-lbl">False Negative</div>
+                </div>
+                <div class="cm-cell cm-tp">
+                  <div class="cm-num">243</div>
+                  <div class="cm-lbl">True Positive</div>
+                </div>
+              </div>
+            </div>
+            <div class="glass-panel">
+              <h4 style="font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-subtle);font-weight:700;margin-bottom:16px;">Purchase Class Metrics</h4>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:600;color:var(--fg-muted);margin-bottom:6px;"><span>Precision</span><span style="color:var(--green)">72%</span></div>
+                  <div style="height:6px;background:rgba(10,14,12,.08);border-radius:999px;overflow:hidden;"><div style="width:72%;height:100%;background:linear-gradient(90deg,var(--green),#4ade80);border-radius:999px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:600;color:var(--fg-muted);margin-bottom:6px;"><span>Recall</span><span style="color:var(--terra)">64%</span></div>
+                  <div style="height:6px;background:rgba(10,14,12,.08);border-radius:999px;overflow:hidden;"><div style="width:64%;height:100%;background:linear-gradient(90deg,var(--terra),#fbbf24);border-radius:999px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:600;color:var(--fg-muted);margin-bottom:6px;"><span>F1-Score</span><span style="color:var(--blue)">68%</span></div>
+                  <div style="height:6px;background:rgba(10,14,12,.08);border-radius:999px;overflow:hidden;"><div style="width:68%;height:100%;background:linear-gradient(90deg,var(--blue),#60a5fa);border-radius:999px;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:600;color:var(--fg-muted);margin-bottom:6px;"><span>Support</span><span style="color:var(--fg)">382 sessions</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── THRESHOLD ── -->
+        <div id="threshold" style="margin-bottom:72px;">
+          <div class="section-label terra"><span class="section-label-dot"></span> Output Interpretation</div>
+          <h2 class="section-h2">Threshold & Decision Boundary</h2>
+          <p class="section-sub">The model outputs a probability score between 0 and 1. A <strong>decision threshold</strong> converts this into a binary prediction.</p>
+
+          <div class="glass-panel" style="margin-top:28px;">
+            <h4 style="font-size:.88rem;margin-bottom:8px;color:var(--fg-muted);font-weight:600;">Decision Boundary at 0.49</h4>
+            <div class="thresh-visual" style="margin:32px 0 8px;">
+              <div class="thresh-line" style="left:49%;">
+                <div class="thresh-label" style="left:0;">0.49 threshold</div>
+              </div>
+            </div>
+            <div class="thresh-ends">
+              <span>0.0 — Will Not Purchase</span>
+              <span>1.0 — Will Purchase</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;">
+              <div style="padding:16px;background:var(--green-soft);border:1px solid rgba(31,122,61,.18);border-radius:var(--r-sm);">
+                <div style="font-size:.8rem;font-weight:700;color:var(--green);margin-bottom:6px;">Probability ≥ 0.49</div>
+                <div style="font-size:.88rem;color:var(--fg);font-weight:600;">Will Purchase</div>
+                <div style="font-size:.78rem;color:var(--fg-muted);margin-top:4px;">Strong enough evidence of purchase intent detected in the browsing session.</div>
+              </div>
+              <div style="padding:16px;background:var(--terra-soft);border:1px solid rgba(200,90,46,.18);border-radius:var(--r-sm);">
+                <div style="font-size:.8rem;font-weight:700;color:var(--terra);margin-bottom:6px;">Probability &lt; 0.49</div>
+                <div style="font-size:.88rem;color:var(--fg);font-weight:600;">Will Not Purchase</div>
+                <div style="font-size:.78rem;color:var(--fg-muted);margin-top:4px;">Insufficient purchase signals — visitor may need re-engagement or retargeting.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-green" style="margin-top:16px;">
+            <div class="callout-icon">🎯</div>
+            <div class="callout-body">
+              <h4>Why 0.49 instead of the default 0.50?</h4>
+              <p>The threshold was tuned by sweeping values from 0.05 to 0.90 and selecting the threshold that maximizes the <strong>F1-score</strong> on the purchase class. At 0.49 the model achieves the best balance between Precision (72%) and Recall (64%), slightly favoring capturing more true buyers at the cost of a few extra false alarms.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── API USAGE ── -->
+        <div id="usage" style="margin-bottom:0;">
+          <div class="section-label blue"><span class="section-label-dot"></span> API Usage</div>
+          <h2 class="section-h2">Calling the Prediction API</h2>
+          <p class="section-sub">Send a POST request with a JSON body containing all 17 input fields. The API returns a probability score, label, and threshold.</p>
+
+          <div style="margin-top:28px;background:var(--fg);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-xl);">
+            <div style="background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08);padding:12px 20px;display:flex;align-items:center;gap:10px;">
+              <span style="display:flex;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></span><span style="width:10px;height:10px;border-radius:50%;background:#febc2e;"></span><span style="width:10px;height:10px;border-radius:50%;background:#28c840;"></span></span>
+              <span style="font-size:.75rem;font-weight:600;color:rgba(244,245,240,.4);letter-spacing:.06em;text-transform:uppercase;">POST /predict</span>
+            </div>
+            <div style="padding:24px;font-family:monospace;font-size:.82rem;color:rgba(255,255,255,.8);line-height:2;overflow-x:auto;">
+              <div><span style="color:#a78bfa;">fetch</span>(<span style="color:#86efac;">'https://xstynwx-online-shoppers-api.hf.space/predict'</span>, {</div>
+              <div>&nbsp;&nbsp;method: <span style="color:#86efac;">'POST'</span>,</div>
+              <div>&nbsp;&nbsp;headers: { <span style="color:#86efac;">'Content-Type'</span>: <span style="color:#86efac;">'application/json'</span> },</div>
+              <div>&nbsp;&nbsp;body: <span style="color:#a78bfa;">JSON</span>.stringify({</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Administrative"</span>: <span style="color:#fbbf24;">2</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Administrative_Duration"</span>: <span style="color:#fbbf24;">0</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Informational"</span>: <span style="color:#fbbf24;">0</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Informational_Duration"</span>: <span style="color:#fbbf24;">0</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"ProductRelated"</span>: <span style="color:#fbbf24;">15</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"ProductRelated_Duration"</span>: <span style="color:#fbbf24;">1020.5</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"BounceRates"</span>: <span style="color:#fbbf24;">0.3</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"ExitRates"</span>: <span style="color:#fbbf24;">0.05</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"PageValues"</span>: <span style="color:#fbbf24;">125.3</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"SpecialDay"</span>: <span style="color:#fbbf24;">0</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Month"</span>: <span style="color:#86efac;">"Nov"</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"OperatingSystems"</span>: <span style="color:#fbbf24;">2</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Browser"</span>: <span style="color:#fbbf24;">4</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Region"</span>: <span style="color:#fbbf24;">1</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"TrafficType"</span>: <span style="color:#fbbf24;">2</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"VisitorType"</span>: <span style="color:#86efac;">"Returning_Visitor"</span>,</div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">"Weekend"</span>: <span style="color:#fb923c;">true</span></div>
+              <div>&nbsp;&nbsp;})</div>
+              <div>})</div>
+              <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);">
+                <div style="color:rgba(255,255,255,.4);font-style:italic;margin-bottom:8px;">// Response:</div>
+                <div>{</div>
+                <div>&nbsp;&nbsp;<span style="color:#7dd3fc;">"will_purchase"</span>: <span style="color:#fb923c;">true</span>,</div>
+                <div>&nbsp;&nbsp;<span style="color:#7dd3fc;">"prediction"</span>: <span style="color:#fbbf24;">1</span>,</div>
+                <div>&nbsp;&nbsp;<span style="color:#7dd3fc;">"prediction_label"</span>: <span style="color:#86efac;">"Will Purchase"</span>,</div>
+                <div>&nbsp;&nbsp;<span style="color:#7dd3fc;">"probability"</span>: <span style="color:#fbbf24;">0.8134</span>,</div>
+                <div>&nbsp;&nbsp;<span style="color:#7dd3fc;">"threshold"</span>: <span style="color:#fbbf24;">0.49</span></div>
+                <div>}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;">
+            <div class="callout callout-green" style="margin-top:0;">
+              <div class="callout-icon">✅</div>
+              <div class="callout-body">
+                <h4>Health Check</h4>
+                <p>GET <code>https://xstynwx-online-shoppers-api.hf.space/health</code> — returns 200 OK with a status message when the API is running.</p>
+              </div>
+            </div>
+            <div class="callout callout-blue" style="margin-top:0;">
+              <div class="callout-icon">📚</div>
+              <div class="callout-body">
+                <h4>Interactive Docs</h4>
+                <p>FastAPI auto-generates Swagger UI at <code>/docs</code>. Test the API directly from your browser without writing any code.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /doc-content -->
+    </div><!-- /doc-layout -->
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">ShopperAI</div>
+        <div class="footer-sub">Dataset documentation for the DSC × Ureeka Workshop. Built from the Online Shoppers Intention dataset on Kaggle.</div>
+      </div>
+      <div class="footer-links">
+        <a href="index.html"      class="footer-link">Home</a>
+        <a href="index.html#dashboard" class="footer-link">Dashboard</a>
+        <a href="https://www.kaggle.com/datasets/henrysue/online-shoppers-intention" target="_blank" class="footer-link">Kaggle ↗</a>
+        <a href="https://xstynwx-online-shoppers-api.hf.space/docs" target="_blank" class="footer-link">API Docs ↗</a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2025 ShopperAI · DSC × Ureeka · All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  /* NAV SCROLL */
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+    // TOC active link
+    const sections = ['overview','features','engineered','pipeline','models','performance','threshold','usage'];
+    let current = null;
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        const top = el.getBoundingClientRect().top;
+        if (top <= 120) current = id;
+      }
+    });
+    document.querySelectorAll('.toc-item a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+
+  /* Animate model bars on load */
+  document.addEventListener('DOMContentLoaded', () => {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.mc-bar-fill[data-w]').forEach(bar => {
+            const w = bar.getAttribute('data-w');
+            setTimeout(() => { bar.style.width = w + '%'; }, 100);
+          });
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const mg = document.getElementById('modelGrid');
+    if (mg) io.observe(mg);
+
+    // Init model bar widths to 0
+    document.querySelectorAll('.mc-bar-fill[data-w]').forEach(b => b.style.width = '0%');
+
+    // Scroll reveal
+    const revealIO = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+          revealIO.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.eng-card, .model-card, .perf-card, .step-card').forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(22px)';
+      el.style.transition = `opacity .5s ${i * 0.06}s ease, transform .5s ${i * 0.06}s ease`;
+      revealIO.observe(el);
+    });
+  });
+</script>
+</body>
+</html>
