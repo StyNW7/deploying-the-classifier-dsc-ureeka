@@ -203,32 +203,82 @@
     ===================================================== */
     .doc-layout {
       display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 40px;
+      grid-template-columns: 224px 1fr;
+      gap: 44px;
       align-items: start;
     }
+
+    /* ---- Desktop sticky sidebar ---- */
     .toc {
-      position: sticky; top: 80px;
+      position: sticky; top: 82px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--r);
-      padding: 22px;
+      padding: 20px;
       backdrop-filter: blur(24px) saturate(180%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), var(--shadow-sm);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.72), var(--shadow-sm);
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+      scrollbar-width: none;
     }
-    .toc-title { font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-subtle); margin-bottom:14px; }
-    .toc-list { list-style:none; display:flex; flex-direction:column; gap:2px; }
+    .toc::-webkit-scrollbar { display: none; }
+
+    .toc-title {
+      font-size: .66rem; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--fg-subtle); margin-bottom: 12px;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 1px; }
     .toc-item a {
-      font-size:.82rem; font-weight:500; color:var(--fg-muted);
-      text-decoration:none; padding:7px 12px;
-      border-radius:var(--r-sm); display:block;
-      transition: color .2s, background .2s;
+      font-size: .81rem; font-weight: 500; color: var(--fg-muted);
+      text-decoration: none; padding: 7px 10px;
+      border-radius: var(--r-sm); display: block;
       border-left: 2px solid transparent;
+      transition: color .18s, background .18s, border-color .18s;
     }
-    .toc-item a:hover   { color:var(--fg); background:rgba(10,14,12,.05); border-left-color:var(--border-md); }
-    .toc-item a.active  { color:var(--green); background:var(--green-soft); border-left-color:var(--green); font-weight:600; }
-    .toc-item.sub a  { padding-left:22px; font-size:.78rem; }
-    .toc-sep { height:1px; background:var(--border); margin:10px 0; }
+    .toc-item a:hover  { color: var(--fg); background: rgba(10,14,12,.05); border-left-color: var(--border-md); }
+    .toc-item a.active { color: var(--green); background: var(--green-soft); border-left-color: var(--green); font-weight: 600; }
+    .toc-item.sub a    { padding-left: 20px; font-size: .76rem; color: var(--fg-subtle); }
+    .toc-item.sub a:hover  { color: var(--fg-muted); }
+    .toc-item.sub a.active { color: var(--green); }
+    .toc-sep { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* ---- Mobile horizontal TOC strip ---- */
+    .toc-mobile {
+      display: none;
+      position: sticky; top: 62px; z-index: 90;
+      background: rgba(244,245,240,.92);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      box-shadow: 0 2px 12px rgba(10,14,12,.06);
+    }
+    .toc-mobile-inner {
+      display: flex; align-items: center; gap: 6px;
+      overflow-x: auto; padding: 10px 0;
+      scrollbar-width: none;
+    }
+    .toc-mobile-inner::-webkit-scrollbar { display: none; }
+    .toc-mobile-lbl {
+      font-size: .66rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--fg-subtle); white-space: nowrap;
+      padding-right: 8px; border-right: 1px solid var(--border);
+      margin-right: 2px; flex-shrink: 0;
+    }
+    .toc-pill {
+      display: inline-flex; align-items: center;
+      font-size: .76rem; font-weight: 600; white-space: nowrap;
+      color: var(--fg-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 5px 13px; border-radius: 999px;
+      text-decoration: none; flex-shrink: 0;
+      transition: color .18s, background .18s, border-color .18s;
+    }
+    .toc-pill:hover  { color: var(--fg); background: rgba(10,14,12,.05); border-color: var(--border-md); }
+    .toc-pill.active { color: var(--green); background: var(--green-soft); border-color: rgba(31,122,61,.28); font-weight: 700; }
 
     /* =====================================================
        SECTION SHARED STYLES
@@ -472,9 +522,15 @@
     /* =====================================================
        RESPONSIVE
     ===================================================== */
-    @media(max-width:1000px) { .doc-layout { grid-template-columns:1fr; } .toc { display:none; } }
+    /* Sidebar → hide, mobile strip → show */
+    @media(max-width:1060px) {
+      .doc-layout { grid-template-columns: 1fr; gap: 0; }
+      .toc { display: none; }
+      .toc-mobile { display: block; }
+      .section-pad { padding-top: 0; }
+    }
     @media(max-width:860px)  { .hero-doc-inner { grid-template-columns:1fr; } .dataset-card { display:none; } .model-grid { grid-template-columns:1fr 1fr; } .perf-grid { grid-template-columns:1fr 1fr; } }
-    @media(max-width:640px)  { .model-grid { grid-template-columns:1fr; } .eng-grid { grid-template-columns:1fr; } nav .nav-pill { display:none; } }
+    @media(max-width:640px)  { .model-grid { grid-template-columns:1fr; } .eng-grid { grid-template-columns:1fr; } nav .nav-pill { display:none; } .toc-mobile { padding: 0 1rem; } }
     @media(max-width:480px)  { .perf-grid { grid-template-columns:1fr 1fr; } }
   </style>
 </head>
@@ -569,10 +625,25 @@
 
 <div class="divider"></div>
 
+<!-- Mobile TOC strip (shown below 1060px) -->
+<div class="toc-mobile" id="tocMobile">
+  <div class="toc-mobile-inner" id="tocMobileInner">
+    <span class="toc-mobile-lbl">Contents</span>
+    <a class="toc-pill active" href="#overview"    data-sec="overview">Overview</a>
+    <a class="toc-pill"        href="#features"    data-sec="features">Input Features</a>
+    <a class="toc-pill"        href="#engineered"  data-sec="engineered">Engineered</a>
+    <a class="toc-pill"        href="#pipeline"    data-sec="pipeline">Pipeline</a>
+    <a class="toc-pill"        href="#models"      data-sec="models">Models</a>
+    <a class="toc-pill"        href="#performance" data-sec="performance">Performance</a>
+    <a class="toc-pill"        href="#threshold"   data-sec="threshold">Threshold</a>
+    <a class="toc-pill"        href="#usage"       data-sec="usage">API Usage</a>
+  </div>
+</div>
+
 <!-- =====================================================
      MAIN DOC LAYOUT
 ===================================================== -->
-<section class="section-pad" style="background:var(--bg);">
+<section class="section-pad" style="background:var(--bg);padding-top:48px;">
   <div class="container">
     <div class="doc-layout">
 
@@ -1264,21 +1335,39 @@
 <script>
   /* NAV SCROLL */
   const nav = document.getElementById('navbar');
+  const SECTIONS = ['overview','features','engineered','pipeline','models','performance','threshold','usage'];
+
+  function updateActiveToc(current) {
+    // Desktop sidebar
+    document.querySelectorAll('.toc-item a').forEach(a => {
+      const href = a.getAttribute('href');
+      const sec  = href ? href.replace('#','') : '';
+      // sidebar sub-links for features map to same section
+      a.classList.toggle('active', sec === current || (current === 'features' && sec === 'features'));
+    });
+
+    // Mobile pill strip
+    const pills = document.querySelectorAll('.toc-pill');
+    pills.forEach(p => {
+      p.classList.toggle('active', p.dataset.sec === current);
+    });
+
+    // Scroll active pill into view
+    const activePill = document.querySelector(`.toc-pill[data-sec="${current}"]`);
+    if (activePill) {
+      activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }
+
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 40);
-    // TOC active link
-    const sections = ['overview','features','engineered','pipeline','models','performance','threshold','usage'];
-    let current = null;
-    sections.forEach(id => {
+
+    let current = SECTIONS[0];
+    SECTIONS.forEach(id => {
       const el = document.getElementById(id);
-      if (el) {
-        const top = el.getBoundingClientRect().top;
-        if (top <= 120) current = id;
-      }
+      if (el && el.getBoundingClientRect().top <= 140) current = id;
     });
-    document.querySelectorAll('.toc-item a').forEach(a => {
-      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-    });
+    updateActiveToc(current);
   });
 
   /* Animate model bars on load */
