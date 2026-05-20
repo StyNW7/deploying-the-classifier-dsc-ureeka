@@ -8,383 +8,378 @@ app_port: 8000
 pinned: false
 ---
 
-# Online Shoppers Purchase Prediction API
+<div align="center">
 
-This is the Session 2 deployment project.
+# 🛒 Online Shoppers Purchase Prediction API
 
-In Session 1, we trained a machine learning model. In Session 2, we turn that trained model into a small web service, so other people can send shopper-session data and receive a prediction.
+### *From Notebook Experiment to Public AI Service*
 
-The prediction answers this question:
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.6-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?style=flat-square&logo=huggingface&logoColor=black)](https://huggingface.co/spaces)
+[![License](https://img.shields.io/badge/License-MIT-10B981?style=flat-square)](LICENSE)
+[![API Status](https://img.shields.io/badge/API-Live-22c55e?style=flat-square&logo=rocket&logoColor=white)](https://xstynwx-online-shoppers-api.hf.space/health)
 
-```text
-Based on this visitor's session, is the visitor likely to purchase?
+<br/>
+
+**A production-ready machine learning API that predicts whether an online shopping session will result in a purchase — deployed publicly on Hugging Face Spaces.**
+
+[🚀 Live Website](https://dsc-ureeka.vercel.app/) · [📖 Swagger Docs](https://xstynwx-online-shoppers-api.hf.space/docs) · [📊 Dataset Docs](https://dsc-ureeka.vercel.app/docs.html)
+
+</div>
+
+---
+
+## 📌 Overview
+
+This project bridges the gap between **machine learning experimentation** and **real-world deployment**. A trained `HistGradientBoostingClassifier` is wrapped in a FastAPI application, containerized with Docker, and hosted publicly on Hugging Face Spaces — accessible to anyone, anywhere, instantly.
+
+> **The core question the model answers:**
+> *"Based on this visitor's browsing session, will they make a purchase?"*
+
+| | |
+|---|---|
+| **Dataset** | [Online Shoppers Intention](https://www.kaggle.com/datasets/henrysue/online-shoppers-intention) — 12,199 sessions |
+| **Model** | HistGradientBoostingClassifier (best of 6 models trained) |
+| **PR-AUC** | 0.7585 (CV) · 0.7415 (test) |
+| **ROC-AUC** | 0.9327 (test) |
+| **Accuracy** | 90.5% (test) |
+| **Threshold** | 0.49 (F1-optimized) |
+
+---
+
+## 🌐 Live Demo
+
+The API is publicly deployed and ready to use — no setup required.
+
+| Endpoint | URL |
+|---|---|
+| 🏠 Base URL | `https://xstynwx-online-shoppers-api.hf.space` |
+| 📖 Swagger UI | `https://xstynwx-online-shoppers-api.hf.space/docs` |
+| ❤️ Health Check | `https://xstynwx-online-shoppers-api.hf.space/health` |
+| 🚀 Live Website | `https://dsc-ureeka.vercel.app/` |
+| 📊 Dataset Docs | `https://dsc-ureeka.vercel.app/docs.html` |
+
+**Quick test — try it in your terminal:**
+
+```bash
+curl -X POST "https://xstynwx-online-shoppers-api.hf.space/predict" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "Administrative": 2, "Administrative_Duration": 0,
+       "Informational": 0, "Informational_Duration": 0,
+       "ProductRelated": 15, "ProductRelated_Duration": 1020.5,
+       "BounceRates": 0.3, "ExitRates": 0.05, "PageValues": 125.3,
+       "SpecialDay": 0, "Month": "Nov", "OperatingSystems": 2,
+       "Browser": 4, "Region": 1, "TrafficType": 2,
+       "VisitorType": "Returning_Visitor", "Weekend": true
+     }'
 ```
 
-## Big Picture
-Think of the project like a restaurant:
-
-```text
-Customer order -> Kitchen prepares food -> Waiter returns result
-```
-
-In this project:
-
-```text
-User input -> FastAPI receives it -> features.py prepares it -> model predicts -> API returns result
-```
-
-The user does not need to know how the model works internally. They only send normal input data, and the API handles the rest.
-
-## Folder Contents
-
-```text
-main.py                  The FastAPI app. This is the front door of the API.
-schema.py                Describes what input the API accepts and what output it returns.
-features.py              Recreates the feature engineering from Session 1.(turns raw input into model-ready columns)
-model.py                 Loads the trained model, threshold, and column order.
-online_shoppers_model.pkl  The trained machine learning model from Session 1.(artifact)
-threshold.pkl            The decision threshold from Session 1. (artifact)
-model_columns.pkl        The exact column order used during training.(artifact)
-requirements.txt         The Python packages needed to run the API.
-Dockerfile               Instructions for packaging the API with Docker.
-.dockerignore            Tells Docker which local files should not be packed.
-```
-## Recommended Code-Building Flow
-This is the recommended order if building the project from scratch.
-
-1. requirements.txt
-2. schema.py
-3. features.py
-4. model.py
-5. main.py
-6. Dockerfile
-7. .dockerignore
-8. README.md
-
-This order is for making the code, not because Python runs the files in this exact order.
-
-Start with `requirements.txt` because we need to decide what tools the project uses. For this project, we need FastAPI for the web API, scikit-learn for the trained model, pandas and NumPy for data preparation, and joblib for loading `.pkl` files.
-
-Next, create `schema.py`. Before writing prediction logic, we should decide what the user is allowed to send. This file is like the form template for `/predict`.
-
-Then create `features.py`. After we know the input shape, we can write the logic that changes raw user input into model-ready columns. This is where the Session 1 feature engineering is recreated.
-
-After that, create `model.py`. This file loads the saved artifacts from Session 1: the trained model, the threshold, and the model column order.
-
-Then create `main.py`. At this point, the pieces already exist, so `main.py` can connect them into API endpoints. It receives input, calls `features.py`, uses the loaded model, applies the threshold, and returns the prediction.
-
-(OPTIONAL) Finally, create `Dockerfile` and `.dockerignore`. These are not part of the prediction logic. They are used to package the app for deployment.
-In short:
-
-```text
-requirements.txt = choose the tools
-schema.py        = define the input and output shape
-features.py      = prepare raw input for the model
-model.py         = load the saved model files from session 1
-main.py          = connect everything into API endpoints
-Dockerfile       = package the app for deployment
-.dockerignore    = keep unnecessary files out of Docker
-README.md        = explain the project(OPTIONAL)
-```
-
-## Runtime Flow
-This is what happens when someone actually calls the API:
-
-```text
-User sends JSON
-        ↓
-schema.py checks the JSON
-        ↓
-main.py receives the checked data
-        ↓
-features.py creates the model-ready columns
-        ↓
-model.py provides the trained model and threshold
-        ↓
-main.py returns the prediction
-```
-
-Simple version:
-
-```text
-schema.py -> features.py -> model.py -> main.py response
-```
-
-## What Each Important File Does
-
-### `main.py`
-This file creates the web API.
-It has two endpoints:
-
-```text
-GET /health
-POST /predict
-```
-
-`/health` checks whether the API is alive.
-`/predict` receives shopper data and returns the model prediction.
-
-### `schema.py`
-This file defines the shape of the input.
-For example, it says that:
-
-```text
-ProductRelated should be a number
-Month should be text
-Weekend should be true or false
-```
-
-This helps FastAPI check the input before it reaches the model.
-
-### `features.py`
-This file prepares the data before prediction.
-The model was not trained only on the raw dataset columns. During Session 1, we created extra columns such as:
-
-```text
-TotalDuration
-TotalPages
-ProductDurationPerPage
-ProductPageRatio
-MonthNum
-IsHolidaySeason
-log features
-```
-
-That same work must happen again during deployment. If we skip this step, the model may receive incomplete or wrong data.
-
-So users only send simple raw data, and `features.py` automatically creates the extra columns.
-
-### `model.py`
-
-This file loads three important artifacts:
-
-```text
-artifacts/online_shoppers_model.pkl
-artifacts/threshold.pkl
-artifacts/model_columns.pkl
-```
-
-`online_shoppers_model.pkl` is the trained model.
-`threshold.pkl` tells the API when to say "Will Purchase" or "Will Not Purchase".
-`model_columns.pkl` stores the exact column order from training. This is important because the model expects the data in the same shape it saw during Session 1.
-
-## Why `model_columns.pkl` Matters
-Machine learning models are picky about column order.
-If the model learned from columns like this:
-
-```text
-Administrative, ProductRelated, BounceRates, ...
-```
-
-we should send the columns back in the same order during deployment.
-`model_columns.pkl` helps us avoid manually writing and maintaining that full list inside the deployment code.
-
-Important note:
-
-```text
-model_columns.pkl stores the column names.
-features.py still creates the column values.
-```
-
-So `model_columns.pkl` does not replace `features.py`. They work together.
-
-## Setup
-Check Python:
-
-```powershell
-python --version
-```
-
-This project is designed for Python 3.10 or newer. Python 3.11 is recommended.
-Create a virtual environment:
-
-```powershell
-py -3.11 -m venv venv
-```
-
-If that command does not work, install Python 3.11 first from python install manager:
-
-```text
-https://www.python.org/downloads/
-```
-py install 3.11
-then proceed with making the venv once more
-
-Deleting old venv(if necessary):
-rmdir /s /q venv
-## Install Packages
-
-```powershell
-pip install -r requirements.txt
-```
-But sometimes, PowerShell may block venv activation. If that happens, you can use the venv Python directly.
-Recommended command:
-
-```powershell
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-This installs FastAPI, scikit-learn, pandas, NumPy, and other packages needed by the API.
-
-## Run Locally
-Use this command:
-
-```powershell
-uvicorn main:app --reload
-===(or)===
-.\venv\Scripts\python.exe -m uvicorn main:app --reload
-```
-
-If it works, you should see a message saying Uvicorn is running.
-Open this URL in your browser:
-
-```text
-http://localhost:8000/docs
-```
-
-This opens Swagger UI, an automatic testing page created by FastAPI.
-
-## Test the API
-In Swagger UI:
-1. Open `POST /predict`
-2. Click `Try it out`
-3. Use this example JSON
-4. Click `Execute`
-
-```json
-{
-  "Administrative": 0,
-  "Administrative_Duration": 0,
-  "Informational": 0,
-  "Informational_Duration": 0,
-  "ProductRelated": 5,
-  "ProductRelated_Duration": 320.5,
-  "BounceRates": 0.02,
-  "ExitRates": 0.05,
-  "PageValues": 15.3,
-  "SpecialDay": 0,
-  "Month": "Nov",
-  "OperatingSystems": 2,
-  "Browser": 2,
-  "Region": 1,
-  "TrafficType": 2,
-  "VisitorType": "Returning_Visitor",
-  "Weekend": false
-}
-```
-
-Example response:
-
+**Response:**
 ```json
 {
   "will_purchase": true,
   "prediction": 1,
   "prediction_label": "Will Purchase",
-  "probability": 0.618,
+  "probability": 0.8134,
   "threshold": 0.49
 }
 ```
 
-The exact probability may be different depending on the trained model.
+---
 
-## How to Read the Result
+## 🔁 Machine Learning Pipeline
 
-```text
-will_purchase
+```mermaid
+flowchart LR
+    A[🗂️ Raw Dataset\n12K Sessions] --> B[🔧 Feature Engineering\n+20 derived features]
+    B --> C[🧠 Model Training\n6 classifiers compared]
+    C --> D[💾 Save Artifacts\n.pkl files]
+    D --> E[⚡ FastAPI\nREST endpoints]
+    E --> F[🐳 Docker\nContainerized]
+    F --> G[🤗 Hugging Face\nCloud Deploy]
+    G --> H[🌐 Public AI Service\nLive & accessible]
+
+    style A fill:#f0fdf4,stroke:#86efac
+    style H fill:#eff6ff,stroke:#93c5fd
+    style G fill:#fef3c7,stroke:#fcd34d
 ```
 
-`true` means the model predicts the visitor will purchase.
-`false` means the model predicts the visitor will not purchase.
+---
 
-```text
-probability
+## ✨ Features
+
+- ⚡ **Real-time prediction** — sub-second inference via REST API
+- 📖 **Auto-generated Swagger docs** — interactive testing at `/docs`
+- 🛡️ **Pydantic input validation** — type-safe request handling
+- 🔧 **Full feature engineering pipeline** — raw inputs automatically transformed
+- 🎯 **Probability-based output** — confidence score + threshold comparison
+- 🐳 **Docker containerized** — consistent across all environments
+- ☁️ **Public cloud deployment** — live on Hugging Face Spaces
+- 📊 **Threshold tuning** — F1-optimized decision boundary at 0.49
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Language** | Python 3.11 | Core runtime |
+| **API Framework** | FastAPI | REST API, auto-docs, async support |
+| **ML Library** | scikit-learn 1.6 | Model training & inference |
+| **Data Processing** | pandas, NumPy | Feature engineering pipeline |
+| **Model Serialization** | joblib | Save/load `.pkl` artifacts |
+| **Validation** | Pydantic | Request/response schema enforcement |
+| **Server** | Uvicorn | ASGI production server |
+| **Containerization** | Docker | Reproducible deployment environment |
+| **Cloud Hosting** | Hugging Face Spaces | Free public API deployment |
+| **Development** | GitHub Codespaces | Cloud-based dev environment |
+
+---
+
+## 📁 Project Structure
+
+```
+online-shoppers-api/
+│
+├── 📄 main.py                   # FastAPI app — endpoints, routing, response logic
+├── 📄 schema.py                 # Pydantic models — input & output shapes
+├── 📄 features.py               # Feature engineering — recreates Session 1 pipeline
+├── 📄 model.py                  # Artifact loader — model, threshold, column order
+│
+├── 📄 requirements.txt          # Python dependencies
+├── 📄 Dockerfile                # Container build instructions
+├── 📄 .dockerignore             # Files excluded from Docker image
+│
+└── 📂 artifacts/
+    ├── 🧠 online_shoppers_model.pkl   # Trained HistGradientBoostingClassifier
+    ├── 🎯 threshold.pkl               # Optimal decision threshold (0.49)
+    └── 📋 model_columns.pkl           # Exact feature column order from training
 ```
 
-This is the model's estimated chance that the visitor will purchase.
+<details>
+<summary><b>Why each file exists</b></summary>
 
-```text
-threshold
+<br/>
+
+| File | Role |
+|---|---|
+| `main.py` | The **front door**. Receives HTTP requests, coordinates the prediction flow, returns JSON. |
+| `schema.py` | The **contract**. Defines exactly what input is accepted and what output is returned. FastAPI enforces this automatically. |
+| `features.py` | The **translator**. Transforms simple raw user input into the 30+ column feature matrix the model expects — mirroring Session 1 exactly. |
+| `model.py` | The **loader**. Reads the three `.pkl` files once at startup and holds them in memory for fast inference. |
+| `artifacts/*.pkl` | The **brain**. Serialized outputs from Session 1 training — the model, threshold, and column order. |
+| `Dockerfile` | The **lunchbox**. Packages the entire app — code, model, and dependencies — into a portable container. |
+
+</details>
+
+---
+
+## ⚙️ How the API Works
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 User
+    participant F as ⚡ FastAPI
+    participant S as 📋 schema.py
+    participant FE as 🔧 features.py
+    participant M as 🧠 model.py
+    participant R as 📊 Response
+
+    U->>F: POST /predict (17 raw fields)
+    F->>S: Validate input shape & types
+    S-->>F: ✅ Validated ShopperInput
+    F->>FE: Engineer 30+ model features
+    FE-->>F: Ready feature DataFrame
+    F->>M: predict_proba(features)
+    M-->>F: probability score
+    F->>R: Apply threshold → label
+    R-->>U: JSON { will_purchase, probability, label }
 ```
 
-This is the cutoff from Session 1.
-For example, if the threshold is `0.49`:
-
-```text
-probability >= 0.49 -> Will Purchase
-probability < 0.49  -> Will Not Purchase
+**In plain English:**
+```
+User sends 17 raw fields
+    → FastAPI validates the shape
+    → features.py builds 30+ model-ready columns
+    → model predicts a probability
+    → threshold converts probability to a label
+    → API returns structured JSON
 ```
 
-## Run with Docker -> won't run if files are saved in oneDrive
-Docker is optional here, but it is useful for testing before actual deployment in HuggingFace(because HuggingFace utilizes Docker, and fixing things after uploading it can be quite a hassle).
-If only local learning and not deployment, Docker is not required. Running with `uvicorn` is enough.
+---
 
-Without Docker, the API depends on whatever is installed on someone's laptop:
+## 📡 API Endpoints
 
-```text
-Python version
-scikit-learn version
-FastAPI version
-operating system setup
-local virtual environment
+### `GET /health`
+
+Checks whether the API is running.
+
+```bash
+curl https://xstynwx-online-shoppers-api.hf.space/health
 ```
 
-This can cause problems. For example, a model trained with one scikit-learn version may fail when loaded with another scikit-learn version.
-Docker helps by packaging the app together with its environment.
-
-Think of Docker as a lunchbox for the app:
-
-```text
-It carries the code, the model files, and the exact Python packages together.
+```json
+{ "status": "ok" }
 ```
 
-So the API can run more consistently on:
+---
 
-```text
-your laptop
-another participant's laptop
-a server
-Hugging Face Spaces
-cloud deployment
+### `POST /predict`
+
+Predicts purchase intent from a shopper session.
+
+**Request body** (all 17 fields required):
+
+```json
+{
+  "Administrative":            2,
+  "Administrative_Duration":   0.0,
+  "Informational":             0,
+  "Informational_Duration":    0.0,
+  "ProductRelated":            15,
+  "ProductRelated_Duration":   1020.5,
+  "BounceRates":               0.30,
+  "ExitRates":                 0.05,
+  "PageValues":                125.3,
+  "SpecialDay":                0.0,
+  "Month":                     "Nov",
+  "OperatingSystems":          2,
+  "Browser":                   4,
+  "Region":                    1,
+  "TrafficType":               2,
+  "VisitorType":               "Returning_Visitor",
+  "Weekend":                   true
+}
 ```
 
-Docker becomes useful when you want to share, deploy, or avoid "it works on my computer" problems.
+**Response:**
 
-Docker packages the API so it can run in a clean environment.
-Build the image(Make sure docker desktop is installed):
-
-```powershell
-docker build -t shoppers-api .
+```json
+{
+  "will_purchase":    true,
+  "prediction":       1,
+  "prediction_label": "Will Purchase",
+  "probability":      0.8134,
+  "threshold":        0.49
+}
 ```
 
-Run the container:
+**Reading the result:**
 
-```powershell
-docker run -p 8000:8000 shoppers-api
+| Field | Meaning |
+|---|---|
+| `will_purchase` | `true` if probability ≥ threshold, else `false` |
+| `prediction` | `1` = purchase, `0` = no purchase |
+| `prediction_label` | Human-readable: `"Will Purchase"` or `"Will Not Purchase"` |
+| `probability` | Model's estimated purchase probability (0.0 – 1.0) |
+| `threshold` | Decision cutoff from F1 tuning — fixed at `0.49` |
+
+---
+
+## 💻 Local Development
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/StyNW7/deploying-the-classifier-dsc-ureeka
+cd deploying-the-classifier-dsc-ureeka
 ```
 
-Open:
+**2. Create a virtual environment**
 
-```text
+```bash
+# Windows
+py -3.11 -m venv venv
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
+
+# macOS / Linux
+python3.11 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+**3. Run the API**
+
+```bash
+# Windows (recommended — avoids activation issues)
+.\venv\Scripts\python.exe -m uvicorn main:app --reload
+
+# macOS / Linux
+uvicorn main:app --reload
+```
+
+**4. Open in browser**
+
+```
 http://localhost:8000/docs
 ```
 
-Use Docker if you want to test a deployment-like environment on your own computer.
+> Swagger UI opens automatically — test the API interactively without writing any code.
 
-## Deploy to Hugging Face Spaces
-Hugging Face Spaces can host this API online.
-Use these steps:
+---
 
-1. Go to `https://huggingface.co`
-2. Create an account or log in
-3. Click your profile picture
-4. Choose `New Space`
-5. Give the Space a name, for example `online-shoppers-api`
-6. Choose `Docker` as the Space SDK
-7. Create the Space
-8. Upload all files from this folder
+## 🐳 Docker
 
-Make sure these files are uploaded:
-```text
+Docker packages the entire app — code, model, and environment — into a portable container. Recommended before deploying to Hugging Face.
+
+> ⚠️ **Note:** Docker may not work if files are saved inside OneDrive (symlink conflicts). Move the project to a local folder first.
+
+**Build the image:**
+
+```bash
+docker build -t shoppers-api .
+```
+
+**Run the container:**
+
+```bash
+docker run -p 8000:8000 shoppers-api
+```
+
+**Test it:**
+
+```
+http://localhost:8000/docs
+```
+
+If Swagger loads and `/health` returns `ok`, the container is working correctly — and the app is ready to deploy.
+
+---
+
+## ☁️ GitHub Codespaces
+
+Run the API entirely in the cloud — no local setup required.
+
+1. Open the repository on GitHub
+2. Click **Code → Codespaces → Create codespace on main**
+3. Wait for the environment to build, then run:
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+4. Codespaces will auto-forward port `8000` — click the link to open Swagger UI.
+
+---
+
+## 🤗 Hugging Face Spaces Deployment
+
+Hugging Face Spaces hosts the Docker container as a free public API.
+
+**Steps:**
+
+1. Go to [huggingface.co](https://huggingface.co) and log in
+2. Click your profile → **New Space**
+3. Name your Space (e.g. `online-shoppers-api`)
+4. Select **Docker** as the SDK · set **App Port** to `8000`
+5. Upload these files (do **not** upload `venv/`):
+
+```
 main.py
 schema.py
 features.py
@@ -395,90 +390,253 @@ artifacts/online_shoppers_model.pkl
 artifacts/threshold.pkl
 artifacts/model_columns.pkl
 ```
-DO NOT UPLOAD VENV! 
 
-After upload, Hugging Face will build the Docker image.
-When the build is finished, open:
+6. Hugging Face builds the Docker image automatically.
+7. When the build finishes, visit:
 
-```text
-https://your-space-url/docs
 ```
-https://(USERNAME)-(SPACENAME).hf.space/docs
-
-for testing purposes: 
-https://potatott-test-deployment-online-shoppers-fastapi.hf.space/docs
-https://potatott-test-deployment-online-shoppers-fastapi.hf.space/health
-if both docs & health works, then deployment is successful
-
-## =================================================================================================
-## Common Problems
-### PowerShell blocks activation
-
-If this command fails:
-
-```powershell
-venv\Scripts\activate
+https://YOUR-USERNAME-YOUR-SPACE-NAME.hf.space/docs
 ```
 
-use this instead:
+✅ If Swagger loads and `/health` returns `ok` — deployment is successful.
+
+---
+
+## 🔬 Machine Learning Details
+
+<details>
+<summary><b>Model selection & training</b></summary>
+
+<br/>
+
+Six classifiers were trained and evaluated using **5-fold Stratified Cross-Validation** with **PR-AUC** as the scoring metric (optimal for imbalanced classification):
+
+| Model | CV PR-AUC |
+|---|---|
+| 🥇 HistGradientBoostingClassifier | **0.7585** |
+| Soft Voting Ensemble | 0.7561 |
+| Gradient Boosting | 0.7541 |
+| Random Forest | 0.7538 |
+| Extra Trees | 0.7391 |
+| Logistic Regression | 0.6644 |
+
+All models used `RandomizedSearchCV` for hyperparameter tuning. HistGradientBoosting was selected as the final model.
+
+</details>
+
+<details>
+<summary><b>Feature engineering</b></summary>
+
+<br/>
+
+The raw 17 input fields are transformed into 30+ model-ready features inside `features.py`. Key engineered features:
+
+| Feature | Formula | Why |
+|---|---|---|
+| `TotalDuration` | sum of all page durations | Overall session engagement |
+| `TotalPages` | sum of all page counts | Breadth of exploration |
+| `ProductDurationPerPage` | `ProductRelated_Duration / ProductRelated` | Depth per product page |
+| `ProductEngagement` | `ProductRelated × ProductRelated_Duration` | Composite buying-intent score |
+| `ExitBounceGap` | `ExitRates − BounceRates` | Exit pattern beyond bouncing |
+| `ProductPageRatio` | `ProductRelated / TotalPages` | Session focus on products |
+| `*_log` features | `log1p(duration)` | Compress right-skewed distributions |
+
+> ⚠️ The feature engineering in `features.py` must exactly match Session 1. If they differ, the model receives incorrect data and predictions become unreliable.
+
+</details>
+
+<details>
+<summary><b>Threshold tuning</b></summary>
+
+<br/>
+
+By default, classifiers use `0.50` as the decision threshold. This project swept thresholds from `0.05` to `0.90` and selected the value that maximized **F1-score** on the purchase class:
+
+```
+Best threshold: 0.49
+
+probability ≥ 0.49  →  "Will Purchase"
+probability < 0.49  →  "Will Not Purchase"
+```
+
+This slight shift from `0.50` improves recall on the minority (purchase) class without sacrificing too much precision.
+
+</details>
+
+<details>
+<summary><b>Why model_columns.pkl matters</b></summary>
+
+<br/>
+
+ML models are sensitive to feature column order. If `features.py` produces columns in a different order than training, the model silently receives wrong data.
+
+`model_columns.pkl` stores the exact column list from Session 1 and is used by `model.py` to reindex the feature DataFrame before inference — ensuring the order is always correct.
+
+```python
+# Recreate from Session 1 if needed:
+import joblib
+joblib.dump(num_cols + cat_cols, "model_columns.pkl")
+```
+
+</details>
+
+---
+
+## 🚀 Future Improvements
+
+- [ ] **Prediction logging** — store inputs/outputs in a database for monitoring
+- [ ] **User authentication** — API key or OAuth2 protection
+- [ ] **Drift detection** — alert when input distribution shifts from training data
+- [ ] **CI/CD pipeline** — automated testing and deployment on push
+- [ ] **MLOps integration** — model versioning with MLflow or DVC
+- [ ] **Batch prediction endpoint** — predict multiple sessions in one request
+- [ ] **A/B model serving** — compare model versions in production
+
+---
+
+## 🛠️ Troubleshooting
+
+<details>
+<summary><b>PowerShell blocks venv activation</b></summary>
+
+<br/>
+
+If `venv\Scripts\activate` fails, call the venv Python directly — no activation needed:
 
 ```powershell
 .\venv\Scripts\python.exe -m uvicorn main:app --reload
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-You do not need to activate the venv if you call its Python directly.
+</details>
 
-### `ModuleNotFoundError`
+<details>
+<summary><b>ModuleNotFoundError</b></summary>
 
-This means a package is missing.
+<br/>
 
-Run:
+A package is missing. Run:
 
 ```powershell
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-### `online_shoppers_model.pkl was not found`
-The trained model file must be inside the `artifacts` folder.
+</details>
 
-### `model_columns.pkl was not found`
-The column list file must be inside the `artifacts` folder.
+<details>
+<summary><b>Artifact not found (.pkl files)</b></summary>
 
-Create it from Session 1 with:
+<br/>
+
+All three artifact files must live inside the `artifacts/` folder:
+
+```
+artifacts/online_shoppers_model.pkl
+artifacts/threshold.pkl
+artifacts/model_columns.pkl
+```
+
+If `model_columns.pkl` is missing, recreate it from Session 1:
 
 ```python
-joblib.dump(num_cols + cat_cols, "model_columns.pkl")
+import joblib
+joblib.dump(num_cols + cat_cols, "artifacts/model_columns.pkl")
 ```
 
-### The API runs, but prediction feels strange
-Check that the feature engineering in `features.py` matches Session 1.
-For machine learning deployment, this is one of the most important rules:
+</details>
 
-```text
-The data preparation during training and deployment must match.
+<details>
+<summary><b>Predictions seem wrong</b></summary>
+
+<br/>
+
+The most common cause: `features.py` in Session 2 does not match the feature engineering from Session 1.
+
+**Rule:** The data preparation at training time and inference time must be identical — same columns, same formulas, same order.
+
+Check `features.py` against the Session 1 notebook carefully.
+
+</details>
+
+---
+
+## 🎓 Workshop Context
+
+<div align="center">
+
+Built for the
+
+### **DSC × Ureeka Workshop 2026**
+
+*"Beyond the Model: Bridging Machine Learning and Real-World Deployment"*
+
+</div>
+
+This project is **Session 2** of a two-part workshop series:
+
+| Session | Focus | Output |
+|---|---|---|
+| **Session 1** | Data cleaning, feature engineering, model training, and evaluation | `model.pkl`, `threshold.pkl`, `model_columns.pkl` |
+| **Session 2** *(this repo)* | Wrapping the model in FastAPI, containerizing with Docker, deploying to the cloud | Live public API on Hugging Face Spaces |
+
+The goal: show that **a machine learning model only creates real-world impact when it can reach real users** — not just when it scores well in a notebook.
+
+---
+
+## 👤 Contributor
+
+<div align="center">
+
+| | |
+|---|---|
+| **Author** | Stanley Nathanael Wijaya |
+| **Event** | DSC × Ureeka Workshop 2026 |
+| **Role** | Workshop Speaker — Deploy the Classifier |
+
+</div>
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — free to use, modify, and distribute.
+
+```
+MIT License
+
+Copyright (c) 2026 Stanley Nathanael Wijaya
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software.
 ```
 
-## Session 1 to Session 2 Checklist
-Before deployment, Session 1 should produce:
+---
 
-```text
-online_shoppers_model.pkl
-threshold.pkl
-model_columns.pkl
-```
+<div align="center">
 
-Session 2 should contain:
+**Session 1 → Session 2 Checklist**
 
-```text
-FastAPI code
-feature engineering code
-the three saved files from Session 1
-requirements.txt
-Dockerfile
-```
+| Session 1 produces | Session 2 needs |
+|---|---|
+| `online_shoppers_model.pkl` | ✅ |
+| `threshold.pkl` | ✅ |
+| `model_columns.pkl` | ✅ |
+| Feature engineering logic | Replicated in `features.py` |
 
-## Final Mental Model
-The model is the brain.
-FastAPI is the front desk.
-`features.py` is the translator that changes normal user input into the format the model understands.
-`model_columns.pkl` is the checklist that keeps the translator's output in the correct order.
+<br/>
+
+*"A machine learning model becomes impactful only when it can reach real users."*
+
+<br/>
+
+[![API](https://img.shields.io/badge/🌐%20Live%20API-Visit-10B981?style=for-the-badge)](https://xstynwx-online-shoppers-api.hf.space)
+[![Docs](https://img.shields.io/badge/📖%20Swagger-Docs-2563EB?style=for-the-badge)](https://xstynwx-online-shoppers-api.hf.space/docs)
+
+<br/>
+
+Made with ❤️ for **DSC × Ureeka Workshop 2026**
+
+</div>
