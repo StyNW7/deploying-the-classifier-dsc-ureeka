@@ -7,7 +7,10 @@ https://xstynwx-online-shoppers-api.hf.space/
 HuggingFace Space:
 https://huggingface.co/spaces/xStyNWx/online-shoppers-api/
 
-Canva PPT Presentation:
+Canva PPT Presentation (editable):
+https://canva.link/hzhl5otm13p7sr2
+
+Canva PPT Presentation (public view link):
 https://canva.link/wcc3ehk6c7wdcnv
 
 GitHub Repository Main:
