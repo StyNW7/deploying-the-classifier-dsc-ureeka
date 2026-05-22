@@ -1478,6 +1478,9 @@
     document.getElementById('mobileMenu').classList.remove('open');
   }
 
+  // CALL API HERE
+  // Frontend JavaScript menggunakan Fetch API : GET Method
+
   /* ---- API HEALTH ---- */
   async function checkHealth() {
     const ids  = [['statusDot','statusTxt'],['statusDotM','statusTxtM']];
@@ -1629,6 +1632,8 @@
 
     if (window.innerWidth < 900) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+
+  // CALL API HERE -> POST Method
 
   /* ---- SUBMIT ---- */
   async function submitPrediction() {
